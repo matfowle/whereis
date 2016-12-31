@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>CMX Finder</title>
+        <link rel="stylesheet" type="text/css" href="mystyle.css">
+    </head>
+    <body>
+    <div class="login-page">
+        <div class="form">
+            <form action="cgi-bin/cmxfinder.py" method="POST" class="register-form">
+                <fieldset>
+                    <legend>Who are you looking for?</legend>
+                    <input type="text" placeholder="username" name="person"/>
+                    <input type="hidden" value="0" name="clientCurrent"/>
+                    <button type="submit" value="Submit">Find</button></fieldset>
+                </fieldset>
+                <p class="message">Don't want to input manually? <a href="#">Select from a dropdown list?</a></p>
+            </form>
+            <form action="cgi-bin/cmxfinder.py" method="POST" class="login-form">
+                <fieldset>
+                    <legend>Who are you looking for?</legend>
+                    <br>
+                    <select name="person" id="mySelection">
+                        <option value="" disabled selected hidden>Select the person you are looking for</option>
+                        <option value="matt-iphone">Matt (iPhone)</option>
+                        <option value="matt-mac">Matt (mac)</option>
+                        <option value="sian-iphone">Sian (iPhone)</option>
+                        <option value="sian-ipad">Sian (iPad)</option>
+                        <option value="sian-mac">Sian (mac)</option>
+                    </select>
+                    <input type="hidden" value="0" name="clientCurrent"/>
+                    <br><br>
+                    <button type="submit" value="Submit" id=submitbutton>Find</button>
+                </fieldset>
+                    <p class="message">Is the person not listed here? <a href="#">Manually enter their username</a></p>
+            </form>
+        </div>
+    </div> 
+    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script>
+        $('.message a').click(function () {
+            $('form').animate({
+                height: 'toggle',
+                opacity: 'toggle'
+            }, 'slow');
+        });
+    </script>
+    </body>
+</html>
