@@ -1,16 +1,16 @@
 #!/usr/local/bin/python
 #####################################################################
-#																	#
-#	Module: 		cmxfinder.py						            #
-#	Author: 		Matthew Fowler 2016							    #
-#	Company: 		Cisco Systems									#
-#	Description:	Python CGI script to find user location via     #
+#                                                                   #
+#   Module:         cmxfinder.py                                    #
+#   Author:         Matthew Fowler 2016                             #
+#   Company:        Cisco Systems                                   #
+#   Description:    Python CGI script to find user location via     #
 #                   the CMX REST API and display it on a map        #
-#																	#
+#                                                                   #
 #####################################################################
 
 #####################################################################
-#						Dependancy Imports							#
+#                       Dependancy Imports                          #
 #####################################################################
 
 import cgi, requests, json, base64, PIL
@@ -21,7 +21,7 @@ from PIL import Image
 from cStringIO import StringIO
 
 #####################################################################
-#						Environment Settings						#
+#                       Environment Settings                        #
 #####################################################################
 
 # CMX address and credentials.
@@ -48,7 +48,7 @@ buff = StringIO()
 
 
 #####################################################################
-#						Function Definitions 						#
+#                       Function Definitions                        #
 #####################################################################
 
 def cmxContent(url):
@@ -70,7 +70,7 @@ def storeMemory(item):
 
 
 #####################################################################
-#							Main Execution 							#
+#                         Main Execution                            #
 #####################################################################
 
 def main():
