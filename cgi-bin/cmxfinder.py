@@ -53,20 +53,20 @@ buff = StringIO()
 
 def cmxContent(url):
 
-	# GET request to CMX based on the url you provide.
-	request = requests.get(url = url,auth = HTTPBasicAuth(cmxUser,cmxPass),verify=False)
-	return request.content
+    # GET request to CMX based on the url you provide.
+    request = requests.get(url = url,auth = HTTPBasicAuth(cmxUser,cmxPass),verify=False)
+    return request.content
 
 def storeMemory(item):
 
-	# Use cStringIO to write the item to memory.
-	buff.write(item)
+    # Use cStringIO to write the item to memory.
+    buff.write(item)
 
-	# Go back to the start of the item.
-	buff.seek(0)
+    # Go back to the start of the item.
+    buff.seek(0)
 
-	# Return the item we just stored.
-	return buff.getvalue()
+    # Return the item we just stored.
+    return buff.getvalue()
 
 
 #####################################################################
@@ -76,17 +76,17 @@ def storeMemory(item):
 def main():
     
     # First, get the data from CMX.
-	# Get the client location data by username.
+    # Get the client location data by username.
     clientList = json.loads(cmxContent(urlClientByUsername+person))
 
     # Check if the user exists in CMX. This is done by checking if the json list is empty.
     if not clientList:
-		print ('Content-type: text/html\n\n'
-        	   '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
-        	   '<div class="form">'\
-        	   '<p class="message">Sorry, '+ person +' could not be found... <a href=../>Search again</a></p><br>'
-        	   '</div>')
-		return
+        print ('Content-type: text/html\n\n'
+               '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+               '<div class="form">'\
+               '<p class="message">Sorry, '+ person +' could not be found... <a href=../>Search again</a></p><br>'
+               '</div>')
+        return
     
     # Get number of clients with this username.
     clientCount = len(clientList)
@@ -136,22 +136,22 @@ def main():
     # Finally, print what you want to show.
     print ('Content-type: text/html\n\n'
            '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
-    	   '<div class="result">'
+           '<div class="result">'
            + person + ' has been found!'
            '<p class="message" style="text-align:center">')
    
     # This adds an additional message if there are more than one device with the username.
     if clientCount > 1:
-    	print ('This username is being used by '+ clientCount +' devices'
-    		   '<br>This is device ' + clientNext +' of '+ clientCount +'')
+        print ('This username is being used by '+ clientCount +' devices'
+               '<br>This is device ' + clientNext +' of '+ clientCount +'')
 
         # This adds a hidden form with a button that runs the search again for the next device in the list.
         # As you can see it runs the script again - this is done because the device may be on another floor so we may need a new image.
-    	if clientNext <= clientCount:
-    		print ('<br><form action="cgi-bin/cmxfinder.py" method="POST" class="login-form">'
-    			'<input type="hidden" value="'+ clientNext +'" name="clientCurrent"/>'
-    			'<button type="submit" value="Submit">Click here to see the next device</button>'
-    			'</form> ')
+        if clientNext <= clientCount:
+            print ('<br><form action="cgi-bin/cmxfinder.py" method="POST" class="login-form">'
+                   '<input type="hidden" value="'+ clientNext +'" name="clientCurrent"/>'
+                   '<button type="submit" value="Submit">Click here to see the next device</button>'
+                   '</form> ')
 
     print ('<br>MAC address: '+ client["macAddress"] + 
            '<br>IP address: '+ client["ipAddress"][0] + 
@@ -173,15 +173,15 @@ def main():
 try: 
     # Check that the username isn't empty.
     if person == None:
-    	print ('Content-type: text/html\n\n'
-    		   '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+        print ('Content-type: text/html\n\n'
+               '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
                '<div class="form">'
                '<p class="message">You did not enter anything... <a href=../>Search again</a></p><br>'
                '</div>')
 
     else:
-    	if __name__ == "__main__":
-    		main()
+        if __name__ == "__main__":
+            main()
 
 except:
     cgi.print_exception()
