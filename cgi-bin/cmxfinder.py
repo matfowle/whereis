@@ -25,9 +25,9 @@ from cStringIO import StringIO
 #####################################################################
 
 # CMX address and credentials.
-cmxAddr = "https://fowler-bmgdrvjrjj.dynamic-m.com:444"
-cmxUser = "admin"
-cmxPass = "***REMOVED***"
+cmxAddr = "blah"
+cmxUser = "blah"
+cmxPass = "blah"
 
 # These aren't needed, just here for testing.
 cmxAuthString = cmxUser +':'+ cmxPass
