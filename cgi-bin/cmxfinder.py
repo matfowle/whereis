@@ -136,37 +136,38 @@ def main():
     # Finally, print what you want to show.
     print ('Content-type: text/html\n\n'
            '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
-           '<div class="result">'
+           '<div class="form">'
            + person + ' has been found!'
-           '<p class="message" style="text-align:center">')
-   
-    # This adds an additional message if there are more than one device with the username.
+           '</div><div class="form">'
+           '<p class="message" style="text-align:center">'
+           '<p class="message" style="text-align:center">'
+           '<br><b>MAC address:</b> '+ client["macAddress"] + 
+           '<br><b>IP address:</b> '+ client["ipAddress"][0] + 
+           '<br><b>Connected to:</b> '+ client["ssId"] + 
+           '<br><b>Campus:</b> '+ hierarchy[0] + 
+           '<br><b>Building:</b> '+ hierarchy[1] + 
+           '<br><b>Floor:</b> '+ hierarchy[2] + 
+           '<br><b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
+           '<br><b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
+           '<img src="data:image/png;base64,'+ newimage +'"/>'
+           '<br>Click on the image to expand</p>')
+
+    # This adds an additional message if there is more than one device with the requested username.
     if clientCount > 1:
-        print ('This username is being used by '+ clientCount +' devices'
-               '<br>This is device ' + clientNext +' of '+ clientCount +'')
+        print ('<p class="message"><b>!!!This username is being used by '+ str(clientCount) +' devices!!!</b>'
+               '<br>This is device ' + str(clientNext) +' of '+ str(clientCount) +'</p>')
 
         # This adds a hidden form with a button that runs the search again for the next device in the list.
         # As you can see it runs the script again - this is done because the device may be on another floor so we may need a new image.
-        if clientNext <= clientCount:
-            print ('<br><form action="cgi-bin/cmxfinder.py" method="POST" class="login-form">'
-                   '<input type="hidden" value="'+ clientNext +'" name="clientCurrent"/>'
+        if clientNext < clientCount:
+            print ('<br><form action="cmxfinder.py" method="POST" class="login-form">'
+                   '<input type="hidden" value="'+ str(clientNext) +'" name="clientCurrent"/>'
+                   '<input type="hidden" value="'+ person +'" name="person"/>'
                    '<button type="submit" value="Submit">Click here to see the next device</button>'
                    '</form> ')
 
-    print ('<br>MAC address: '+ client["macAddress"] + 
-           '<br>IP address: '+ client["ipAddress"][0] + 
-           '<br>Connected to: '+ client["ssId"] + 
-           '<br>Campus: '+ hierarchy[0] + 
-           '<br>Building: '+ hierarchy[1] + 
-           '<br>Floor: '+ hierarchy[2] + 
-           '<br>Coordinates: x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
-           '<br>Last heard: '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
-           '<img src="data:image/png;base64,'+ newimage +'"/>'
-           '<br>Click on the image to expand'
-           '</p>'
-           '</div><center>'
-           '<div class="form">'
-           '<p class="message">Do you want to look for another? <a href=../>Search again</a></p><br>'
+    print ('</p>'
+           '<p class="message">Do you want to look for another user? <a href=../>Search again</a></p><br>'
            '</div>')
 
 

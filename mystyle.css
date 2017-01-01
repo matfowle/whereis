@@ -15,7 +15,7 @@ img:active {
 }
 .form {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   background: #FFFFFF;
   max-width: 400px; 
   margin: 0 auto 10px;
@@ -73,25 +73,6 @@ img:active {
 }
 .form .register-form {
   display: none;
-}
-.result {
-  position: relative;
-  z-index: 2;
-  background: #FFFFFF;
-  max-width: 400px; 
-  margin: 0 auto 10px;
-  padding: 45px;
-  text-align: center;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-}
-.result .message {
-  margin: 15px 0 0;
-  color: #b3b3b3;
-  font-size: 12px;
-}
-.result .message a {
-  color: #0191C8;
-  text-decoration: none;
 }
 .container {
   position: relative;
