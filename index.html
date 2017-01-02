@@ -4,14 +4,16 @@
         <link rel="stylesheet" type="text/css" href="mystyle.css">
     </head>
     <body>
-    <div class="login-page">
+    <img src="logo.png">
+    <div id="loading" class="form"></div>
+    <div id="content" class="login-page">
         <div class="form">
             <form action="cgi-bin/cmxfinder.py" method="POST" class="register-form">
                 <fieldset>
                     <legend>Who are you looking for?</legend>
                     <input type="text" placeholder="username" name="person"/>
                     <input type="hidden" value="0" name="clientCurrent"/>
-                    <button type="submit" value="Submit">Find</button></fieldset>
+                    <button type="submit" value="Submit" onclick="loading();">Find</button>
                 </fieldset>
                 <p class="message">Don't want to input manually? <a href="#">Select from a dropdown list?</a></p>
             </form>
@@ -29,9 +31,22 @@
                     </select>
                     <input type="hidden" value="0" name="clientCurrent"/>
                     <br><br>
-                    <button type="submit" value="Submit" id=submitbutton>Find</button>
+                    <button type="submit" value="Submit" id="submitbutton" onclick="loading();">Find</button>
                 </fieldset>
-                    <p class="message">Is the person not listed here? <a href="#">Manually enter their username</a></p>
+                    <p class="message">Is the person not listed here? 
+                    <br>
+                    <a href="#">Manually enter their username</a>
+                    </p>
+            </form>
+        </div>   
+        <div class="form-b">
+            <form action="cgi-bin/cmxfinder.py" method="POST">
+                <fieldset>
+                    <legend>Alternatively...</legend>
+                    <input type="hidden" value="all" name="person"/>
+                    <input type="hidden" value="0" name="clientCurrent"/>
+                    <button type="submit" value="Submit" onclick="loading();">List all users</button>
+                </fieldset>
             </form>
         </div>
     </div> 
@@ -44,5 +59,11 @@
             }, 'slow');
         });
     </script>
+    <script type="text/javascript">// <![CDATA[
+        function loading(){
+            $("#loading").show();
+            $("#content").hide();       
+        }
+// ]]></script>
     </body>
 </html>

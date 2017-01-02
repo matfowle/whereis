@@ -35,6 +35,7 @@ cmxEncodedAuthString = base64.b64encode(cmxAuthString)
 
 # API URLs
 urlClientByUsername = cmxAddr +"/api/location/v2/clients?username="
+urlAllClients = cmxAddr +"/api/location/v2/clients"
 urlFloorImage = cmxAddr +"/api/config/v1/maps/imagesource/"
 
 # Get values from the HTML form that is POST to this script.
@@ -75,6 +76,29 @@ def storeMemory(item):
 
 def main():
     
+    if person == "all":
+        allClientsList = sorted(json.loads(cmxContent(urlAllClients)), key=lambda k: k['userName'])
+        allClientsCount = len(allClientsList)
+        print ('Content-type: text/html\n\n'
+               '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+               '<div class="form">'
+               + str(allClientsCount) +' users were found!'
+               '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>')
+        
+        for client in allClientsList:
+            searchedClient = client["userName"]
+            print ('<p class="message">'
+                   '<form action="cmxfinder.py" method="POST" class="login-form">'
+                   '<input type="hidden" value="0" name="clientCurrent"/>'
+                   '<input type="hidden" value="'+ searchedClient +'" name="person"/>'
+                   '<button type="submit" value="Submit">'+ searchedClient +'</button>'
+                   '</form></p>')
+
+
+        print('</p></div>')
+
+        return
+
     # First, get the data from CMX.
     # Get the client location data by username.
     clientList = json.loads(cmxContent(urlClientByUsername+person))
@@ -83,7 +107,7 @@ def main():
     if not clientList:
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
-               '<div class="form">'\
+               '<div class="form">'
                '<p class="message">Sorry, '+ person +' could not be found... <a href=../>Search again</a></p><br>'
                '</div>')
         return
@@ -139,7 +163,6 @@ def main():
            '<div class="form">'
            + person + ' has been found!'
            '</div><div class="form">'
-           '<p class="message" style="text-align:center">'
            '<p class="message" style="text-align:center">'
            '<br><b>MAC address:</b> '+ client["macAddress"] + 
            '<br><b>IP address:</b> '+ client["ipAddress"][0] + 

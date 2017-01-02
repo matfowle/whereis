@@ -1,17 +1,35 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
-img {
+.form img {
     max-width: 100%;
     max-height: 100%;
 }
-img:active {
+.form img:active {
   -webkit-transform: scale(2,2);
+  -moz-transform:scale(2,2);
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+div#loading {
+    width: 350px;
+    height: 35px;
+    position: fixed;
+    padding: 2% 0 0;
+    background-image: url(loadingimage.gif);
+    background-color: #FFFFFF;
+    display: none;
+    background-repeat : no-repeat;
+    background-position : center;
+    left : 0;
+    bottom : 0;
+    right : 0;
+    top : 50%;
+    cursor: wait;
 }
 .login-page {
   width: 400px;
-  padding: 8% 0 0;
+  padding: 2% 0 0;
   margin: auto;
+  text-align: center;
 }
 .form {
   position: relative;
@@ -74,11 +92,36 @@ img:active {
 .form .register-form {
   display: none;
 }
+.form-b {
+  position: relative;
+  z-index: 2;
+  background: #FFFFFF;
+  max-width: 400px; 
+  margin: 0 auto 10px;
+  padding: 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.form-b button {
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: #74C2E1;
+  width: 100%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 14px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+}
 .container {
   position: relative;
   z-index: 1;
   max-width: 360px;
   margin: 0 auto;
+  text-align: center;
 }
 .container:before, .container:after {
   content: "";
@@ -113,6 +156,7 @@ body {
   background: -moz-linear-gradient(right, #0191C8, #74C2E1);
   background: -o-linear-gradient(right, #0191C8, #74C2E1);
   background: linear-gradient(to left, #0191C8, #74C2E1);
+  text-align: center;
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;      
