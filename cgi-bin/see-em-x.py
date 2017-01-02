@@ -1,17 +1,31 @@
 #!/usr/local/bin/python
-#####################################################################
-#                                                                   #
-#   Module:         cmxfinder.py                                    #
-#   Author:         Matthew Fowler 2016                             #
-#   Company:        Cisco Systems                                   #
-#   Description:    Python CGI script to find user location via     #
-#                   the CMX REST API and display it on a map        #
-#                                                                   #
-#####################################################################
+############################################################################
+#                                                                          #
+#   Module:         see-em-x.py                                            #
+#   Author:         Matthew Fowler 2017                                    #
+#   Company:        Cisco Systems                                          #
+#   Description:    Python CGI script to find user locations via           #
+#                   the CMX REST API and display it on a map.              #
+#                                                                          #
+#               Copyright (C) 2017  Matthew Fowler                         #
+#   This program is free software: you can redistribute it and/or modify   #
+#   it under the terms of the GNU General Public License as published by   #
+#   the Free Software Foundation, either version 3 of the License, or      #
+#   any later version.                                                     #
+#                                                                          #
+#   This program is distributed in the hope that it will be useful,        #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+#   GNU General Public License for more details.                           #
+#                                                                          #
+#   You should have received a copy of the GNU General Public License      #
+#   along with this program. If not, see http://www.gnu.org/licenses/.     #
+#                                                                          #
+############################################################################
 
-#####################################################################
-#                       Dependancy Imports                          #
-#####################################################################
+############################################################################
+#                       Dependancy Imports                                 #
+############################################################################
 
 import cgi, requests, json, base64, PIL
 import matplotlib.pyplot as plt
@@ -20,14 +34,14 @@ from requests.auth import HTTPBasicAuth
 from PIL import Image
 from cStringIO import StringIO
 
-#####################################################################
-#                       Environment Settings                        #
-#####################################################################
+############################################################################
+#                       Environment Settings                               #
+############################################################################
 
 # CMX address and credentials.
-cmxAddr = "blah"
-cmxUser = "blah"
-cmxPass = "blah"
+cmxAddr = "https://192.168.1.13"
+cmxUser = "admin"
+cmxPass = "***REMOVED***"
 
 # These aren't needed, just here for testing.
 cmxAuthString = cmxUser +':'+ cmxPass
@@ -48,9 +62,9 @@ clientNext = clientCurrent + 1
 buff = StringIO()
 
 
-#####################################################################
-#                       Function Definitions                        #
-#####################################################################
+############################################################################
+#                       Function Definitions                               #
+############################################################################
 
 def cmxContent(url):
 
@@ -70,9 +84,9 @@ def storeMemory(item):
     return buff.getvalue()
 
 
-#####################################################################
-#                         Main Execution                            #
-#####################################################################
+############################################################################
+#                         Main Execution                                   #
+############################################################################
 
 def main():
     
@@ -88,11 +102,12 @@ def main():
         for client in allClientsList:
             searchedClient = client["userName"]
             print ('<p class="message">'
-                   '<form action="cmxfinder.py" method="POST" class="login-form">'
+                   '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="0" name="clientCurrent"/>'
                    '<input type="hidden" value="'+ searchedClient +'" name="person"/>'
                    '<button type="submit" value="Submit">'+ searchedClient +'</button>'
-                   '</form></p>')
+                   '</form>'
+                   '</p>')
 
 
         print('</p></div>')
@@ -108,7 +123,10 @@ def main():
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
                '<div class="form">'
-               '<p class="message">Sorry, '+ person +' could not be found... <a href=../>Search again</a></p><br>'
+               '<p class="message">'
+               'Sorry, '+ person +' could not be found... <a href=../>Search again</a>'
+               '</p>'
+               '<br>'
                '</div>')
         return
     
@@ -162,35 +180,52 @@ def main():
            '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
            '<div class="form">'
            + person + ' has been found!'
-           '</div><div class="form">'
+           '</div>'
+           '<div class="form">'
            '<p class="message" style="text-align:center">'
-           '<br><b>MAC address:</b> '+ client["macAddress"] + 
-           '<br><b>IP address:</b> '+ client["ipAddress"][0] + 
-           '<br><b>Connected to:</b> '+ client["ssId"] + 
-           '<br><b>Campus:</b> '+ hierarchy[0] + 
-           '<br><b>Building:</b> '+ hierarchy[1] + 
-           '<br><b>Floor:</b> '+ hierarchy[2] + 
-           '<br><b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
-           '<br><b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
+           '<br>'
+           '<b>MAC address:</b> '+ client["macAddress"] + 
+           '<br>'
+           '<b>IP address:</b> '+ client["ipAddress"][0] + 
+           '<br>'
+           '<b>Connected to:</b> '+ client["ssId"] + 
+           '<br>'
+           '<b>Campus:</b> '+ hierarchy[0] + 
+           '<br>'
+           '<b>Building:</b> '+ hierarchy[1] + 
+           '<br>'
+           '<b>Floor:</b> '+ hierarchy[2] + 
+           '<br>'
+           '<b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
+           '<br>'
+           '<b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
            '<img src="data:image/png;base64,'+ newimage +'"/>'
-           '<br>Click on the image to expand</p>')
+           '<br>'
+           'Click on the image to expand'
+           '</p>')
 
     # This adds an additional message if there is more than one device with the requested username.
     if clientCount > 1:
-        print ('<p class="message"><b>!!!This username is being used by '+ str(clientCount) +' devices!!!</b>'
-               '<br>This is device ' + str(clientNext) +' of '+ str(clientCount) +'</p>')
+        print ('<p class="message">'
+        	   '<b>!!!This username is being used by '+ str(clientCount) +' devices!!!</b>'
+               '<br>'
+               'This is device ' + str(clientNext) +' of '+ str(clientCount) +
+               '</p>')
 
         # This adds a hidden form with a button that runs the search again for the next device in the list.
         # As you can see it runs the script again - this is done because the device may be on another floor so we may need a new image.
         if clientNext < clientCount:
-            print ('<br><form action="cmxfinder.py" method="POST" class="login-form">'
+            print ('<br>'
+            	   '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="'+ str(clientNext) +'" name="clientCurrent"/>'
                    '<input type="hidden" value="'+ person +'" name="person"/>'
                    '<button type="submit" value="Submit">Click here to see the next device</button>'
                    '</form> ')
 
-    print ('</p>'
-           '<p class="message">Do you want to look for another user? <a href=../>Search again</a></p><br>'
+    print ('<p class="message">'
+    	   'Do you want to look for another user? <a href=../>Search again</a>'
+    	   '</p>'
+    	   '<br>'
            '</div>')
 
 
@@ -200,7 +235,9 @@ try:
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
                '<div class="form">'
-               '<p class="message">You did not enter anything... <a href=../>Search again</a></p><br>'
+               '<p class="message">You did not enter anything... <a href=../>Search again</a>'
+               '</p>'
+               '<br>'
                '</div>')
 
     else:

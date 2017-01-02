@@ -1,6 +1,27 @@
+<!-- Copyright (C) 2017  Matthew Fowler
+
+    Company:        Cisco Systems                                          
+    Description:    HTML forms that POST to a Python CGI script in order 
+                    to find user locations via the CMX REST API and display 
+                    them on a map.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
 <html>
     <head>
-        <title>CMX Finder</title>
+        <title>See 'em x</title>
         <link rel="stylesheet" type="text/css" href="mystyle.css">
     </head>
     <body>
@@ -8,16 +29,18 @@
     <div id="loading" class="form"></div>
     <div id="content" class="login-page">
         <div class="form">
-            <form action="cgi-bin/cmxfinder.py" method="POST" class="register-form">
+            <form action="cgi-bin/see-em-x.py" method="POST" class="register-form">
                 <fieldset>
                     <legend>Who are you looking for?</legend>
                     <input type="text" placeholder="username" name="person"/>
                     <input type="hidden" value="0" name="clientCurrent"/>
                     <button type="submit" value="Submit" onclick="loading();">Find</button>
                 </fieldset>
-                <p class="message">Don't want to input manually? <a href="#">Select from a dropdown list?</a></p>
+                <p class="message">
+                    Don't want to input manually? <a href="#">Select from a dropdown list?</a>
+                </p>
             </form>
-            <form action="cgi-bin/cmxfinder.py" method="POST" class="login-form">
+            <form action="cgi-bin/see-em-x.py" method="POST" class="login-form">
                 <fieldset>
                     <legend>Who are you looking for?</legend>
                     <br>
@@ -33,14 +56,15 @@
                     <br><br>
                     <button type="submit" value="Submit" id="submitbutton" onclick="loading();">Find</button>
                 </fieldset>
-                    <p class="message">Is the person not listed here? 
-                    <br>
-                    <a href="#">Manually enter their username</a>
+                    <p class="message">
+                        Is the person not listed here? 
+                        <br>
+                        <a href="#">Manually enter their username</a>
                     </p>
             </form>
         </div>   
         <div class="form-b">
-            <form action="cgi-bin/cmxfinder.py" method="POST">
+            <form action="cgi-bin/see-em-x.py" method="POST">
                 <fieldset>
                     <legend>Alternatively...</legend>
                     <input type="hidden" value="all" name="person"/>
@@ -49,7 +73,14 @@
                 </fieldset>
             </form>
         </div>
-    </div> 
+    </div>
+    <div class="footer">
+        <p class="messages">
+            Copyright (C) 2017  Matthew Fowler
+            <br>
+            Location graphic by <a href="http://www.flaticon.com/authors/nice-and-serious">Nice and Serious</a> from <a href="http://www.flaticon.com/">Flaticon</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>. Made with <a href="http://logomakr.com" title="Logo Maker">Logo Maker</a>
+        </p>
+    </div>
     <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
     <script>
         $('.message a').click(function () {

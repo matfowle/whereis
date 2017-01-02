@@ -1,3 +1,24 @@
+/*
+Copyright (C) 2017  Matthew Fowler
+
+    Company:        Cisco Systems                                          
+    Description:    CSS for a web application that finds user locations 
+                    via the CMX REST API and display them on a map.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
 .form img {
@@ -7,6 +28,7 @@
 .form img:active {
   -webkit-transform: scale(2,2);
   -moz-transform:scale(2,2);
+  -o-transform:scale(2,2);
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 div#loading {
@@ -43,14 +65,14 @@ div#loading {
 }
 .form option {
   font-family: "Roboto", sans-serif;
-  outline: 0;
+  /*outline: 0;
   background: #f2f2f2;
   width: 100%;
   border: 0;
   margin: 0 0 15px;
   padding: 15px;
   box-sizing: border-box;
-  font-size: 14px;
+  font-size: 14px;*/
 }
 .form input {
   font-family: "Roboto", sans-serif;
@@ -115,6 +137,26 @@ div#loading {
   -webkit-transition: all 0.3 ease;
   transition: all 0.3 ease;
   cursor: pointer;
+}
+.footer {
+  width: 350px;
+  padding: 1% 0 0;
+  margin: auto;
+  text-align: center;
+  /*position: fixed;
+  left : 0;
+  bottom : 0;
+  right : 0;
+  top : 90%;*/
+}
+.footer .messages {
+  margin: 15px 0 0;
+  color: #c2d1dd;
+  font-size: 12px;
+}  
+.footer .messages a {
+  color: #0191C8;
+  text-decoration: none;
 }
 .container {
   position: relative;
