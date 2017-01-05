@@ -41,7 +41,7 @@ from cStringIO import StringIO
 # CMX address and credentials.
 cmxAddr = "https://192.168.1.13"
 cmxUser = "admin"
-cmxPass = "***REMOVED***"
+cmxPass = "blah"
 
 # These aren't needed, just here for testing.
 cmxAuthString = cmxUser +':'+ cmxPass
