@@ -90,8 +90,13 @@ def storeMemory(item):
 
 def main():
     
+    # The form returns "all" if the user click on List All Users. This if statement is for that scenario.
     if person == "all":
+        
+        # Get the list of client info from the CMX API and sort by username.
         allClientsList = sorted(json.loads(cmxContent(urlAllClients)), key=lambda k: k['userName'])
+
+        # Get the number of users and print it.
         allClientsCount = len(allClientsList)
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
@@ -99,6 +104,7 @@ def main():
                + str(allClientsCount) +' users were found!'
                '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>')
         
+        # Make a button for every user detected and when clicked on, sumbit that username back to the script.
         for client in allClientsList:
             searchedClient = client["userName"]
             print ('<p class="message">'
