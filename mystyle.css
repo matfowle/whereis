@@ -138,6 +138,9 @@ div#loading {
   transition: all 0.3 ease;
   cursor: pointer;
 }
+.form-b button:hover,.form-b button:active,.form-b button:focus {
+  background: #0191C8;
+}
 .footer {
   width: 350px;
   padding: 1% 0 0;
