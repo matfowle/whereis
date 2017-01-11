@@ -39,8 +39,8 @@ from cStringIO import StringIO
 ############################################################################
 
 # CMX address and credentials.
-cmxAddr = "https://192.168.1.13"
-cmxUser = "admin"
+cmxAddr = "blah"
+cmxUser = "blah"
 cmxPass = "blah"
 
 # These aren't needed, just here for testing.
@@ -101,12 +101,13 @@ def main():
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
                '<div class="form">'
-               + str(allClientsCount) +' users were found!'
+               'Here are all the users that were found!'
                '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>')
         
         # Make a button for every user detected and when clicked on, sumbit that username back to the script.
         for client in allClientsList:
-            searchedClient = client["userName"]
+          searchedClient = client["userName"]
+          if client["userName"] != "":
             print ('<p class="message">'
                    '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="0" name="clientCurrent"/>'
@@ -152,9 +153,12 @@ def main():
     # Now, plot the user's location on the image.
     # Read the floor image from memory with pyplot. Pyplot uses PIL to support jpeg.
     im = plt.imread(StringIO(image.decode('base64')), format='jpeg')
+    
+    # Some images were showing red like http://stackoverflow.com/questions/21641822/ and this seems to fix it.
+    convertedim=Image.open(StringIO(image.decode('base64'))).convert('P')
 
     # Draw a plot over the image that is the same size as the image.
-    implot = plt.imshow(im, extent=[0, client["mapInfo"]["floorDimension"]["width"], 0, client["mapInfo"]["floorDimension"]["length"]], origin='lower', aspect=1)
+    implot = plt.imshow(convertedim, extent=[0, client["mapInfo"]["floorDimension"]["width"], 0, client["mapInfo"]["floorDimension"]["length"]], origin='lower', aspect=1)
 
     # Mark the client's coordinates that we received from CMX. 
     # The first line will draw a dot at the x,y location and the second line will draw a circle around it.
@@ -175,10 +179,9 @@ def main():
     plt.axis('off')
 
     # Save our new image with the plot overlayed to memory. The dpi option here makes the image larger.
-    plt.savefig(buff, format='png', dpi=100)
+    plt.savefig(buff, format='png', dpi=500)
 
     # Get the new image.
-    buff.seek(0)
     newimage = buff.getvalue().encode("base64").strip()
 
     # Finally, print what you want to show.
