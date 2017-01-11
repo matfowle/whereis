@@ -100,6 +100,8 @@ def main():
         allClientsCount = len(allClientsList)
         print ('Content-type: text/html\n\n'
                '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+               '<div id="loading" class="form"></div>'
+               '<div id="content" class="login-page">'
                '<div class="form">'
                'Here are all the users that were found!'
                '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>')
@@ -112,12 +114,19 @@ def main():
                    '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="0" name="clientCurrent"/>'
                    '<input type="hidden" value="'+ searchedClient +'" name="person"/>'
-                   '<button type="submit" value="Submit">'+ searchedClient +'</button>'
+                   '<button type="submit" value="Submit" onclick="loading();">'+ searchedClient +'</button>'
                    '</form>'
                    '</p>')
 
 
-        print('</p></div>')
+        print('</p></div></div>'
+              '<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>'
+              '<script type="text/javascript">'
+              'function loading(){'
+              '    $("#loading").show();'
+              '    $("#content").hide();'     
+              '}'
+              '</script>')
 
         return
 
