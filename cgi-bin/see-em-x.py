@@ -27,7 +27,7 @@
 #                       Dependancy Imports                                 #
 ############################################################################
 
-import cgi, requests, json, base64, PIL
+import cgi, requests, json, base64, PIL, re
 import matplotlib.pyplot as plt
 requests.packages.urllib3.disable_warnings()
 from requests.auth import HTTPBasicAuth
@@ -108,7 +108,7 @@ def main():
         
         # Make a button for every user detected and when clicked on, sumbit that username back to the script.
         for client in allClientsList:
-          searchedClient = client["userName"]
+          searchedClient = re.escape(client["userName"])
           if client["userName"] != "":
             print ('<p class="message">'
                    '<form action="see-em-x.py" method="POST" class="login-form">'
@@ -204,8 +204,11 @@ def main():
            '<br>'
            '<b>MAC address:</b> '+ client["macAddress"] + 
            '<br>'
-           '<b>IP address:</b> '+ client["ipAddress"][0] + 
-           '<br>'
+           '<b>Status:</b> '+ client["dot11Status"] +'')
+    if client["ipAddress"] != None:
+      print ('<br>'
+             '<b>IP address:</b> '+ client["ipAddress"][0] +'') 
+    print ('<br>'
            '<b>Connected to:</b> '+ client["ssId"] + 
            '<br>'
            '<b>Campus:</b> '+ hierarchy[0] + 
