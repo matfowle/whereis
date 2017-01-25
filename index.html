@@ -29,7 +29,7 @@
     <div id="loading" class="form"></div>
     <div id="content" class="login-page">
         <div class="form">
-            <form action="cgi-bin/see-em-x.py" method="POST" class="register-form">
+            <form action="cgi-bin/see-em-x.py" method="POST" class="login-form">
                 <fieldset>
                     <legend>Who are you looking for?</legend>
                     <input type="text" placeholder="username" name="person"/>
@@ -40,18 +40,18 @@
                     Don't want to input manually? <a href="#">Select from a dropdown list or list all users</a>
                 </p>
             </form>
-            <form action="cgi-bin/see-em-x.py" method="POST" class="login-form">
+            <form action="cgi-bin/see-em-x.py" method="POST" class="register-form">
                 <fieldset>
                     <legend>Who are you looking for?</legend>
                     <br>
                     <select name="person" id="mySelection">
                         <option value="" disabled selected hidden>Select the person you are looking for</option>
-                        <option value="matt-iphone">Matt (iPhone)</option>
-                        <option value="matt-mac">Matt (mac)</option>
-                        <option value="fowler-raspi-1">Raspberry Pi 1</option>
-                        <option value="sian-iphone">Sian (iPhone)</option>
-                        <option value="sian-ipad">Sian (iPad)</option>
-                        <option value="sian-mac">Sian (mac)</option>
+                        <option value="blah1">Blah 1</option>
+                        <option value="blah2">Blah 2</option>
+                        <option value="blah3">Blah 3</option>
+                        <option value="blah4">Blah 4</option>
+                        <option value="blah5">Blah 5</option>
+                        <option value="blah6">Blah 6</option>
                     </select>
                     <input type="hidden" value="0" name="clientCurrent"/>
                     <br><br>
