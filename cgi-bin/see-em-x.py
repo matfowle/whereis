@@ -55,8 +55,13 @@ urlFloorImage = cmxAddr +"/api/config/v1/maps/imagesource/"
 # Get values from the HTML form that is POST to this script.
 form = cgi.FieldStorage()
 person = form.getvalue('person')
+#person = "all"
 clientCurrent = int(form.getvalue('clientCurrent'))
+#clientCurrent = 0
 clientNext = clientCurrent + 1
+
+# Sometime the username used to connect to the network has the domain as a prefix. This defines the prefix.
+domain = r"blah"
 
 # Used for the storeMemory function.
 buff = StringIO()
@@ -104,7 +109,9 @@ def main():
                '<div id="content" class="login-page">'
                '<div class="form">'
                'Here are all the users that were found!'
-               '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>')
+               '<p class="message">Click on the user to see their location or... <a href=../>Search again</a></p>'
+               '<p class="message">This may take some time to fully load...</p>')
+
         
         # Make a button for every user detected and when clicked on, sumbit that username back to the script.
         for client in allClientsList:
@@ -114,10 +121,30 @@ def main():
                    '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="0" name="clientCurrent"/>'
                    '<input type="hidden" value="'+ searchedClient +'" name="person"/>'
-                   '<button type="submit" value="Submit" onclick="loading();">'+ searchedClient +'</button>'
+                   '<button type="submit" value="Submit" onclick="loading();">'+ client["userName"] +'</button>'
                    '</form>'
                    '</p>')
+ 
+        if allClientsCount == 1000:
+          currentCount = allClientsCount - 1000
+          page = 1
 
+          while (currentCount >= 0):
+            allClientsList = sorted(json.loads(cmxContent(urlAllClients+"?page="+str(page))), key=lambda k: k['userName'])
+            allClientsCount = len(allClientsList)
+            for client in allClientsList:
+              searchedClient = re.escape(client["userName"])
+              
+              if client["userName"] != "":
+                print ('<p class="message">'
+                       '<form action="see-em-x.py" method="POST" class="login-form">'
+                       '<input type="hidden" value="0" name="clientCurrent"/>'
+                       '<input type="hidden" value="'+ searchedClient +'" name="person"/>'
+                       '<button type="submit" value="Submit" onclick="loading();">'+ client["userName"] +'</button>'
+                       '</form>'
+                       '</p>')
+            page += 1
+            currentCount = allClientsCount - 1000  
 
         print('</p></div></div>'
               '<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>'
@@ -133,18 +160,23 @@ def main():
     # First, get the data from CMX.
     # Get the client location data by username.
     clientList = json.loads(cmxContent(urlClientByUsername+person))
+    
+    # If the client isn't found, try it again but with the domain as a prefix for the username.
+    if not clientList:
+      clientList = json.loads(cmxContent(urlClientByUsername+domain+person))
 
     # Check if the user exists in CMX. This is done by checking if the json list is empty.
     if not clientList:
-        print ('Content-type: text/html\n\n'
-               '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
-               '<div class="form">'
-               '<p class="message">'
-               'Sorry, '+ person +' could not be found... <a href=../>Search again</a>'
-               '</p>'
-               '<br>'
-               '</div>')
-        return
+      print ('Content-type: text/html\n\n'
+             '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+             '<div class="form">'
+             '<p class="message">'
+             'Sorry, '+ person +' could not be found... <a href=../>Search again</a>'
+             '</p>'
+
+             '<br>'
+             '</div>')
+      return
     
     # Get number of clients with this username.
     clientCount = len(clientList)
@@ -171,8 +203,10 @@ def main():
 
     # Mark the client's coordinates that we received from CMX. 
     # The first line will draw a dot at the x,y location and the second line will draw a circle around it.
-    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])])
-    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=1000, facecolors='none')
+    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], facecolor='r', edgecolor='r')
+    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=1000, facecolors='none', edgecolor='r')
+    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=2000, facecolors='none', edgecolor='r')
+    plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=3500, facecolors='none', edgecolor='r')
 
     # Currently the plot is the same size as the image, but the scale is off so we need to correct that.
     ax = plt.gca()
@@ -197,32 +231,13 @@ def main():
     print ('Content-type: text/html\n\n'
            '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
            '<div class="form">'
-           + person + ' has been found!'
-           '</div>'
-           '<div class="form">'
-           '<p class="message" style="text-align:center">'
+           '<p class="message-a" style="text-align:center">'
+           '<b>'+ client["userName"] + '</b> is <b>'+ client["dot11Status"] +'</b> to <b>'+ client["ssId"] +'</b> in <b>'+ hierarchy[1] +'</b> on level <b>'+ hierarchy[2] +'</b>.'
            '<br>'
-           '<b>MAC address:</b> '+ client["macAddress"] + 
            '<br>'
-           '<b>Status:</b> '+ client["dot11Status"] +'')
-    if client["ipAddress"] != None:
-      print ('<br>'
-             '<b>IP address:</b> '+ client["ipAddress"][0] +'') 
-    print ('<br>'
-           '<b>Connected to:</b> '+ client["ssId"] + 
+           'Click and hold on the image to expand'
            '<br>'
-           '<b>Campus:</b> '+ hierarchy[0] + 
-           '<br>'
-           '<b>Building:</b> '+ hierarchy[1] + 
-           '<br>'
-           '<b>Floor:</b> '+ hierarchy[2] + 
-           '<br>'
-           '<b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
-           '<br>'
-           '<b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
            '<img src="data:image/png;base64,'+ newimage +'"/>'
-           '<br>'
-           'Click on the image to expand'
            '</p>')
 
     # This adds an additional message if there is more than one device with the requested username.
@@ -244,9 +259,21 @@ def main():
                    '</form> ')
 
     print ('<p class="message">'
-    	   'Do you want to look for another user? <a href=../>Search again</a>'
-    	   '</p>'
-    	   '<br>'
+    	     'Do you want to look for another user? <a href=../>Search again</a>'
+    	     '</p>'
+           '<p class="message" style="text-align:center">'
+           'Some extra details that you may want:'
+           '<br>'
+           '<b>MAC address:</b> '+ client["macAddress"] + '')
+    if client["ipAddress"] != None:
+      print ('<br>'
+             '<b>IP address:</b> '+ client["ipAddress"][0] +'') 
+    print ('<br>'
+           '<b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
+           '<br>'
+           '<b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
+    	     '<br>'
+           '</p>'
            '</div>')
 
 

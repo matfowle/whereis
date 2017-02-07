@@ -107,6 +107,11 @@ div#loading {
   color: #b3b3b3;
   font-size: 12px;
 }
+.form .message-a {
+  margin: 15px 0 0;
+  color: #737373;
+  font-size: 14px;
+}
 .form .message a {
   color: #0191C8;
   text-decoration: none;
