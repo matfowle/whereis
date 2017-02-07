@@ -60,7 +60,7 @@ clientCurrent = int(form.getvalue('clientCurrent'))
 #clientCurrent = 0
 clientNext = clientCurrent + 1
 
-# Sometime the username used to connect to the network has the domain as a prefix. This defines the prefix.
+# Sometimes the username used to connect to the network has the domain as a prefix. This defines the prefix.
 domain = r"blah"
 
 # Used for the storeMemory function.
@@ -124,7 +124,8 @@ def main():
                    '<button type="submit" value="Submit" onclick="loading();">'+ client["userName"] +'</button>'
                    '</form>'
                    '</p>')
- 
+        
+        # The CMX API has a maximum page size of 1000 so if there are more and you want to list all users you need do a call for each page.
         if allClientsCount == 1000:
           currentCount = allClientsCount - 1000
           page = 1
