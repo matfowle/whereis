@@ -27,7 +27,7 @@
 #                       Dependancy Imports                                 #
 ############################################################################
 
-import cgi, requests, json, base64, PIL, re
+import cgi, requests, json, base64, PIL, re, uuid, os, sys
 import matplotlib.pyplot as plt
 requests.packages.urllib3.disable_warnings()
 from requests.auth import HTTPBasicAuth
@@ -52,12 +52,13 @@ urlClientByUsername = cmxAddr +"/api/location/v2/clients?username="
 urlAllClients = cmxAddr +"/api/location/v2/clients"
 urlFloorImage = cmxAddr +"/api/config/v1/maps/imagesource/"
 
-# Get values from the HTML form that is POST to this script.
+# Get values from the form that is POST to this script.
 form = cgi.FieldStorage()
 person = form.getvalue('person')
-#person = "all"
 clientCurrent = int(form.getvalue('clientCurrent'))
-#clientCurrent = 0
+searchedBuilding = form.getvalue('searchedBuilding')
+source = form.getvalue('source')
+
 clientNext = clientCurrent + 1
 
 # Sometimes the username used to connect to the network has the domain as a prefix. This defines the prefix.
@@ -88,6 +89,15 @@ def storeMemory(item):
     # Return the item we just stored.
     return buff.getvalue()
 
+def is_json(myjson):
+    
+    # Checks if the content is json.
+    try:
+        json_object = json.loads(myjson)
+    except ValueError, e:
+        return False
+    return json_object
+
 
 ############################################################################
 #                         Main Execution                                   #
@@ -99,7 +109,23 @@ def main():
     if person == "all":
         
         # Get the list of client info from the CMX API and sort by username.
-        allClientsList = sorted(json.loads(cmxContent(urlAllClients)), key=lambda k: k['userName'])
+        allClientsList = is_json(cmxContent(urlAllClients))
+
+        # Sometimes the CMX API might fail to respond with anything so this keeps trying until it does.
+        while (allClientsList == False):
+          allClientsList = is_json(cmxContent(urlAllClients))
+
+        # If the API responds with json, but it is empty, there are no users in CMX so we notify the user.
+        if not allClientsList:
+          print ('Content-type: text/html\n\n'
+                 '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
+                 '<div class="form">'
+                 '<p class="message">'
+                 'There are no users... <a href=../>Search again</a>'
+                 '</p>'
+                 '<br>'
+                 '</div>')
+          return
 
         # Get the number of users and print it.
         allClientsCount = len(allClientsList)
@@ -116,7 +142,8 @@ def main():
         # Make a button for every user detected and when clicked on, sumbit that username back to the script.
         for client in allClientsList:
           searchedClient = re.escape(client["userName"])
-          if client["userName"] != "":
+          hierarchy = client["mapInfo"]["mapHierarchyString"].split('>')
+          if client["userName"] != "" and hierarchy[1] == searchedBuilding:
             print ('<p class="message">'
                    '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="0" name="clientCurrent"/>'
@@ -125,18 +152,26 @@ def main():
                    '</form>'
                    '</p>')
         
-        # The CMX API has a maximum page size of 1000 so if there are more and you want to list all users you need do a call for each page.
+        # The CMX API has a maximum page size of 1000 so if 1000 results are returned then we want to get the next page.
         if allClientsCount == 1000:
           currentCount = allClientsCount - 1000
-          page = 1
+          page = 2
 
+          # When there are less than 1000 results we know it is the last page so we end the while loop.
           while (currentCount >= 0):
-            allClientsList = sorted(json.loads(cmxContent(urlAllClients+"?page="+str(page))), key=lambda k: k['userName'])
+            allClientsList = is_json(cmxContent(urlAllClients+"?page="+str(page)))
+            
+            # Again, sometimes the API fails to respond with json so this keeps trying.
+            while (allClientsList == False):
+              allClientsList = is_json(cmxContent(urlAllClients+"?page="+str(page)))
+
             allClientsCount = len(allClientsList)
+
+            # Make a button for every user detected and when clicked on, sumbit that username back to the script.
             for client in allClientsList:
               searchedClient = re.escape(client["userName"])
-              
-              if client["userName"] != "":
+              hierarchy = client["mapInfo"]["mapHierarchyString"].split('>')
+              if client["userName"] != "" and hierarchy[1] == searchedBuilding:
                 print ('<p class="message">'
                        '<form action="see-em-x.py" method="POST" class="login-form">'
                        '<input type="hidden" value="0" name="clientCurrent"/>'
@@ -168,6 +203,16 @@ def main():
 
     # Check if the user exists in CMX. This is done by checking if the json list is empty.
     if not clientList:
+
+      # If the request came from a post from the Spark Bot, send json with the error message and quit.
+      if source == "spark":
+        print "Content-type: application/json"
+        print
+        response = {'text': 'Sorry, '+ person +' could not be found...', 'image': False, 'clientCount': '0'}
+        print (json.JSONEncoder().encode(response))
+        return 
+      
+      # If not from Spark, print it out in HTML and quit.
       print ('Content-type: text/html\n\n'
              '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
              '<div class="form">'
@@ -203,7 +248,7 @@ def main():
     implot = plt.imshow(convertedim, extent=[0, client["mapInfo"]["floorDimension"]["width"], 0, client["mapInfo"]["floorDimension"]["length"]], origin='lower', aspect=1)
 
     # Mark the client's coordinates that we received from CMX. 
-    # The first line will draw a dot at the x,y location and the second line will draw a circle around it.
+    # The first line will draw a dot at the x,y location and the second and third lines will draw circles around it.
     plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], facecolor='r', edgecolor='r')
     plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=1000, facecolors='none', edgecolor='r')
     plt.scatter([str(client["mapCoordinate"]["x"])], [str(client["mapCoordinate"]["y"])], s=2000, facecolors='none', edgecolor='r')
@@ -228,7 +273,19 @@ def main():
     # Get the new image.
     newimage = buff.getvalue().encode("base64").strip()
 
-    # Finally, print what you want to show.
+    # If the request came from Spark, save the image to a file so that the Spark Bot can send it as a file. It also sends some text about the user and their location.
+    if source == "spark":
+      file = "/var/www/html/images/"+ str(uuid.uuid4()) +".png"
+      fh = open(file, "w+")
+      fh.write(newimage.decode('base64'))
+      fh.close()
+      print "Content-type: application/json"
+      print
+      response = {'text': client["userName"] + ' is '+ client["dot11Status"] +' to '+ client["ssId"] +' in '+ hierarchy[1] +' on level '+ hierarchy[2], 'image': file, 'clientCount': clientCount}
+      print (json.JSONEncoder().encode(response))
+      return
+
+    # If not from Spark, print what you want to show in HTML.
     print ('Content-type: text/html\n\n'
            '<link rel="stylesheet" type="text/css" href="../mystyle.css">'
            '<div class="form">'
@@ -244,7 +301,7 @@ def main():
     # This adds an additional message if there is more than one device with the requested username.
     if clientCount > 1:
         print ('<p class="message">'
-        	   '<b>!!!This username is being used by '+ str(clientCount) +' devices!!!</b>'
+             '<b>!!!This username is being used by '+ str(clientCount) +' devices!!!</b>'
                '<br>'
                'This is device ' + str(clientNext) +' of '+ str(clientCount) +
                '</p>')
@@ -253,15 +310,15 @@ def main():
         # As you can see it runs the script again - this is done because the device may be on another floor so we may need a new image.
         if clientNext < clientCount:
             print ('<br>'
-            	   '<form action="see-em-x.py" method="POST" class="login-form">'
+                 '<form action="see-em-x.py" method="POST" class="login-form">'
                    '<input type="hidden" value="'+ str(clientNext) +'" name="clientCurrent"/>'
                    '<input type="hidden" value="'+ person +'" name="person"/>'
                    '<button type="submit" value="Submit">Click here to see the next device</button>'
                    '</form> ')
 
     print ('<p class="message">'
-    	     'Do you want to look for another user? <a href=../>Search again</a>'
-    	     '</p>'
+           'Do you want to look for another user? <a href=../>Search again</a>'
+           '</p>'
            '<p class="message" style="text-align:center">'
            'Some extra details that you may want:'
            '<br>'
@@ -273,10 +330,9 @@ def main():
            '<b>Coordinates:</b> x='+ str(client["mapCoordinate"]["x"]) +' y='+ str(client["mapCoordinate"]["y"]) + 
            '<br>'
            '<b>Last heard:</b> '+ str(client["statistics"]["maxDetectedRssi"]["lastHeardInSeconds"]) +' seconds ago'+  
-    	     '<br>'
+           '<br>'
            '</p>'
            '</div>')
-
 
 try: 
     # Check that the username isn't empty.
@@ -295,5 +351,3 @@ try:
 
 except:
     cgi.print_exception()
-
-

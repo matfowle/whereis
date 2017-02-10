@@ -34,6 +34,7 @@
                     <legend>Who are you looking for?</legend>
                     <input type="text" placeholder="username" name="person"/>
                     <input type="hidden" value="0" name="clientCurrent"/>
+                    <input type="hidden" value="web" name="source"/>
                     <button type="submit" value="Submit" onclick="loading();">Find</button>
                 </fieldset>
                 <p class="message">
@@ -54,6 +55,7 @@
                         <option value="blah6">Blah 6</option>
                     </select>
                     <input type="hidden" value="0" name="clientCurrent"/>
+                    <input type="hidden" value="web" name="source"/>
                     <br><br>
                     <button type="submit" value="Submit" id="submitbutton" onclick="loading();">Find</button>
                 </fieldset>
@@ -70,7 +72,9 @@
                     <legend>Alternatively...</legend>
                     <input type="hidden" value="all" name="person"/>
                     <input type="hidden" value="0" name="clientCurrent"/>
-                    <button type="submit" value="Submit" onclick="loading();">List all users</button>
+                    <input type="hidden" value="NSD5" name="searchedBuilding"/>
+                    <input type="hidden" value="web" name="source"/>
+                    <button type="submit" value="Submit" onclick="loading();">List all users in NSD5</button>
                 </fieldset>
             </form>
         </div>
