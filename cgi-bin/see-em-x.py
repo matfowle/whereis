@@ -7,7 +7,7 @@
 #   Description:    Python CGI script to find user locations via           #
 #                   the CMX REST API and display it on a map.              #
 #                                                                          #
-#               Copyright (C) 2017  Matthew Fowler                         #
+#               Copyright (C) 2017  Cisco Systems                          #
 #   This program is free software: you can redistribute it and/or modify   #
 #   it under the terms of the GNU General Public License as published by   #
 #   the Free Software Foundation, either version 3 of the License, or      #
@@ -38,10 +38,11 @@ from cStringIO import StringIO
 #                       Environment Settings                               #
 ############################################################################
 
+####CHANGE THESE VALUES#####
 # CMX address and credentials.
-cmxAddr = "blah"
-cmxUser = "blah"
-cmxPass = "blah"
+cmxAddr = ""
+cmxUser = ""
+cmxPass = ""
 
 # These aren't needed, just here for testing.
 cmxAuthString = cmxUser +':'+ cmxPass
@@ -62,10 +63,13 @@ source = form.getvalue('source')
 clientNext = clientCurrent + 1
 
 # Sometimes the username used to connect to the network has the domain as a prefix. This defines the prefix.
-domain = r"blah"
+domain = r"CISCO\\"
 
 # Used for the storeMemory function.
 buff = StringIO()
+
+# This is the path for the floorplan image files should be stored.
+image_path = "../images/"
 
 
 ############################################################################
@@ -229,9 +233,24 @@ def main():
 
     # Get the first client with this username.
     client = clientList[clientCurrent]
-
+    
+    if os.path.isfile(image_path + client["mapInfo"]["image"]["imageName"]) == True:
+      file = image_path + client["mapInfo"]["image"]["imageName"]
+      fh = open(file, "rb")
+      image = storeMemory(fh.read()).encode("base64").strip()
+      fh.close()
+      
+    
+    else:
     # Get the image file of the floor the client is on from CMX and save it in memory with the storeMemory function.
-    image = storeMemory(cmxContent(urlFloorImage + client["mapInfo"]["image"]["imageName"])).encode("base64").strip()
+      image = cmxContent(urlFloorImage + client["mapInfo"]["image"]["imageName"])
+      file = image_path + client["mapInfo"]["image"]["imageName"]
+      fh = open(file, "w+")
+      fh.write(image)
+      fh.close()
+      fh = open(file, "rb")
+      image = storeMemory(fh.read()).encode("base64").strip()
+      
 
     # Split the Campus>Building>Floor string into it's components. 
     # This is useful if you want to print out the location, particularly the floor as floor plans may be similar and hard to distinguish via the image alone.
