@@ -283,7 +283,7 @@ def main():
 
     # If the request came from Spark, save the image to a file so that the Spark Bot can send it as a file. It also sends some text about the user and their location.
     if source == "spark":
-      file = "/var/www/html/images/"+ str(uuid.uuid4()) +".png"
+      file = image_path + str(uuid.uuid4()) +".png"
       fh = open(file, "w+")
       fh.write(newimage.decode('base64'))
       fh.close()
