@@ -220,6 +220,7 @@ def main():
     # Get the first client with this username.
     client = clientList[clientCurrent]
     
+    # Check if we have already got the floor image file sotred locally.
     if os.path.isfile(image_path + client["mapInfo"]["image"]["imageName"]) == True:
       file = image_path + client["mapInfo"]["image"]["imageName"]
       fh = open(file, "rb")
@@ -228,7 +229,8 @@ def main():
       
     
     else:
-    # Get the image file of the floor the client is on from CMX and save it in memory with the storeMemory function.
+    # Get the image file of the floor the client is on from CMX, save it to a file, then load it in StingIO so we can work with it in memory. 
+    # We save it to a file first so that next time we don't have to pull an image from CMX. Speed things up and reduces load on CMX.
       image = cmxContent(urlFloorImage + client["mapInfo"]["image"]["imageName"])
       file = image_path + client["mapInfo"]["image"]["imageName"]
       fh = open(file, "w+")
