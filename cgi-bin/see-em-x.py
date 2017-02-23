@@ -5,7 +5,8 @@
 #   Author:         Matthew Fowler 2017                                    #
 #   Company:        Cisco Systems                                          #
 #   Description:    Python CGI script to find user locations via           #
-#                   the CMX REST API and display it on a map.              #
+#                   the CMX REST API and display it on a map. Accepts      #
+#                   input from a web form or a Spark Bot.                  #
 #                                                                          #
 ############################################################################
 
@@ -220,7 +221,7 @@ def main():
     # Get the first client with this username.
     client = clientList[clientCurrent]
     
-    # Check if we have already got the floor image file sotred locally.
+    # Check if we have already got the floor image file stored locally.
     if os.path.isfile(image_path + client["mapInfo"]["image"]["imageName"]) == True:
       file = image_path + client["mapInfo"]["image"]["imageName"]
       fh = open(file, "rb")
