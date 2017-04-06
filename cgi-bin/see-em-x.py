@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #!/usr/local/bin/python
 ############################################################################
 #                                                                          #
@@ -20,6 +21,7 @@ requests.packages.urllib3.disable_warnings()
 from requests.auth import HTTPBasicAuth
 from PIL import Image
 from cStringIO import StringIO
+import grequests as async
 
 ############################################################################
 #                       Environment Settings                               #
@@ -27,18 +29,30 @@ from cStringIO import StringIO
 
 ####CHANGE THESE VALUES#####
 # CMX address and credentials.
-cmxAddr = ""
-cmxUser = ""
-cmxPass = ""
+cmxAddr1 = "blah"
+cmxAddr2 = "blah"
+cmxAddr3 = "blah"
+cmxAddr4 = "blah"
+cmxUser = "blah"
+cmxPass = "blah"
+
+
+# Put the CMX servers in a list.
+urls = [
+    cmxAddr1,
+    cmxAddr2,
+    cmxAddr3,
+    cmxAddr4
+]
 
 # These aren't needed, just here for testing.
 cmxAuthString = cmxUser +':'+ cmxPass
 cmxEncodedAuthString = base64.b64encode(cmxAuthString)
 
 # API URLs
-urlClientByUsername = cmxAddr +"/api/location/v2/clients?username="
-urlAllClients = cmxAddr +"/api/location/v2/clients"
-urlFloorImage = cmxAddr +"/api/config/v1/maps/imagesource/"
+urlClientByUsername = "/api/location/v2/clients?username="
+urlAllClients = "/api/location/v2/clients"
+urlFloorImage = "/api/config/v1/maps/imagesource/"
 
 # Get values from the form that is POST to this script.
 form = cgi.FieldStorage()
@@ -46,17 +60,19 @@ person = form.getvalue('person')
 clientCurrent = int(form.getvalue('clientCurrent'))
 searchedBuilding = form.getvalue('searchedBuilding')
 source = form.getvalue('source')
+cmxServer = form.getvalue('cmxServer')
 
 clientNext = clientCurrent + 1
 
-# Sometimes the username used to connect to the network has the domain as a prefix. This defines the prefix.
-domain = r"CISCO\\"
+# Sometimes the username used to connect to the network has the domain as a prefix. This list defines the prefixes.
+
+prefixes = ['', r"CISCO\\", r"cisco\\"]
 
 # Used for the storeMemory function.
 buff = StringIO()
 
 # This is the path for the floorplan image files should be stored.
-image_path = "../images/"
+image_path = "blah"
 
 
 ############################################################################
@@ -66,8 +82,11 @@ image_path = "../images/"
 def cmxContent(url):
 
     # GET request to CMX based on the url you provide.
-    request = requests.get(url = url,auth = HTTPBasicAuth(cmxUser,cmxPass),verify=False)
-    return request.content
+    try:
+      request = requests.get(url = url,auth = HTTPBasicAuth(cmxUser,cmxPass),verify=False, timeout=2)
+      return request.content
+    except requests.exceptions.RequestException as e:
+      return "[]"
 
 def storeMemory(item):
 
@@ -184,13 +203,62 @@ def main():
 
         return
 
-    # First, get the data from CMX.
-    # Get the client location data by username.
-    clientList = json.loads(cmxContent(urlClientByUsername+person))
+    ############ New code section that does parallel API calls to the list of CMX servers. ############
+
+    # If we don't know which server the client is on, we need to query them all.
+    if not cmxServer:
+      
+      # Here we need to create a list of URLs with all the potential username domain prefixes.
+      urlClientByUsernameWithDomain = []
+
+      for u in urls:
+        urlClientByUsernameWithDomain.extend((u+urlClientByUsername+p) for p in prefixes)
+
+      # This is the dictionary that we are going to store the responses in a 'URL : Output' format. We can then identify which server responded with the user info.
+      async_dict = {}
+      
+      # Line up all the calls and then send them. 
+      requests = (async.get(url = u+person, auth = HTTPBasicAuth(cmxUser,cmxPass),verify=False, timeout=2) for u in urlClientByUsernameWithDomain)
+      responses = async.map(requests)
     
-    # If the client isn't found, try it again but with the domain as a prefix for the username.
-    if not clientList:
-      clientList = json.loads(cmxContent(urlClientByUsername+domain+person))
+      # The list that we will store the JSON output for the client.
+      clientList = []
+
+      # If the CMX server takes too long to respond, we need to remove the None entries from the responses list.
+      for result in responses:
+        if result == None:
+          responses.remove(result)
+      for result in responses:
+        if result == None:
+          responses.remove(result)
+      
+      # Add each of the responses to the dictionary.
+      for result in responses:
+        async_dict[result.url] = json.loads(result.content)
+
+      # Find the CMX server that has the client and store the JSON in a new list.
+      for k in async_dict:
+        if async_dict[k]:
+          for u in urls:
+            if u in k:
+              cmxAddr = u
+          clientList = async_dict[k]
+          break
+        else:
+          clientList = async_dict[k]
+    
+    # If the CMX Server that this client is on is already known, we want to query that one instead of all the servers.
+    else:
+      cmxAddr = cmxServer
+      clientList = json.loads(cmxContent(cmxAddr+urlClientByUsername+person))
+
+      # If the client isn't found, try it again but with the domain as a prefix for the username.
+      if not clientList:
+        global cmxAddr
+        clientList = json.loads(cmxContent(cmxAddr+urlClientByUsername+domain+person))
+
+    ###################################################################################################
+
 
     # Check if the user exists in CMX. This is done by checking if the json list is empty.
     if not clientList:
@@ -199,8 +267,8 @@ def main():
       if source == "spark":
         print "Content-type: application/json"
         print
-        response = {'text': 'Sorry, '+ person +' could not be found...', 'image': False, 'clientCount': '0'}
-        print (json.JSONEncoder().encode(response))
+        response = {'text': 'Sorry, '+ person +' could not be found...', 'image': False, 'clientCount': '0', 'cmxServer': ''}
+        print (json.JSONEncoder().encode(response))        
         return 
       
       # If not from Spark, print it out in HTML and quit.
@@ -232,7 +300,7 @@ def main():
     else:
     # Get the image file of the floor the client is on from CMX, save it to a file, then load it in StingIO so we can work with it in memory. 
     # We save it to a file first so that next time we don't have to pull an image from CMX. Speed things up and reduces load on CMX.
-      image = cmxContent(urlFloorImage + client["mapInfo"]["image"]["imageName"])
+      image = cmxContent(cmxAddr+urlFloorImage + client["mapInfo"]["image"]["imageName"])
       file = image_path + client["mapInfo"]["image"]["imageName"]
       fh = open(file, "w+")
       fh.write(image)
@@ -289,7 +357,7 @@ def main():
       fh.close()
       print "Content-type: application/json"
       print
-      response = {'text': client["userName"] + ' is '+ client["dot11Status"] +' to '+ client["ssId"] +' in '+ hierarchy[1] +' on level '+ hierarchy[2], 'image': file, 'clientCount': clientCount}
+      response = {'text': client["userName"] + ' is '+ client["dot11Status"] +' to '+ client["ssId"] +' in '+ hierarchy[1] +' on level '+ hierarchy[2], 'image': file, 'clientCount': clientCount, 'cmxServer': cmxAddr}
       print (json.JSONEncoder().encode(response))
       return
 
